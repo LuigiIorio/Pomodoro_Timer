@@ -1,0 +1,132 @@
+#container {
+    position: relative;
+    width: 75vw;
+    height: 70vh;
+    background-color: #f0f0f0;
+    border: 2px solid black;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+#timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    width: 120px;
+    height: 60px;
+    border: 4px solid red; /* Thicker border with red color */
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 60px;
+}
+
+.small-rectangles {
+    position: absolute;
+    width: 5%; /* Reduce width */
+    height: 4%; /* Keep height the same */
+    background-color: rgb(255, 255, 255);
+    border: 5px solid black;
+    bottom: 10%;
+}
+
+#rectangle1 {
+    left: 3.5%; /* Adjust left position */
+}
+
+#rectangle2 {
+    left: calc(3.5% + 10%);
+}
+
+#rectangle3 {
+    left: calc(3.5% + 20%);
+}
+
+#rectangle4 {
+    left: calc(3.5% + 30%);
+}
+
+#rectangle5 {
+    left: calc(3.5% + 40%);
+}
+
+#rectangle6 {
+    left: calc(3.5% + 50%);
+}
+
+#rectangle7 {
+    left: calc(3.5% + 60%);
+}
+
+#rectangle8 {
+    left: calc(3.5% + 70%);
+}
+
+#rectangle9 {
+    left: calc(3.5% + 80%);
+}
+
+#rectangle10 {
+    left: calc(3.5% + 90%);
+}
+
+
+#start_button,
+#stop_button {
+    position: absolute;
+    width: 18%; /* Reduce width */
+    height: 6%; /* Reduce height */
+    background-color: yellow;
+    border: 5px solid black;
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    font-weight: bold;
+    font-family: 'Arial Black', sans-serif; /* Fancy font */
+    font-size: 24px; /* Larger font size */
+    color: black; /* Text color */
+}
+
+#start_button {
+    left: 25%;
+    bottom: 25%;
+}
+
+#stop_button {
+    right: 25%;
+    bottom: 25%;
+}
+
+#option_one {
+    width: 8%; /* Diameter of the circle */
+    height: 17%; /* Diameter of the circle */
+    background-color: rgb(255, 255, 255);
+    border: 5px solid black;
+    border-radius: 50%; /* Make it a circle */
+    position: absolute;
+    left: 30%; /* Adjust horizontal position */
+}
+
+#option_two {
+    width: 8%; /* Diameter of the circle */
+    height: 17%; /* Diameter of the circle */
+    background-color: rgb(255, 255, 255);
+    border: 5px solid black;
+    border-radius: 50%; /* Make it a circle */
+    position: absolute;
+    left: 45%; /* Adjust horizontal position */
+}
+
+#option_three {
+    width: 8%; /* Diameter of the circle */
+    height: 17%; /* Diameter of the circle */
+    background-color: rgb(255, 255, 255);
+    border: 5px solid black;
+    border-radius: 50%; /* Make it a circle */
+    position: absolute;
+    left: 60%; /* Adjust horizontal position */
+}
