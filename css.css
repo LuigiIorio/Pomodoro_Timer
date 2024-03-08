@@ -1,132 +1,73 @@
-#container {
-    position: relative;
-    width: 75vw;
-    height: 70vh;
-    background-color: #f0f0f0;
-    border: 2px solid black;
-    box-sizing: border-box;
-    padding: 20px;
+body {
+    background-color: #ef4b4b;
+    margin: 0;
+    overflow: hidden;
 }
 
+#container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Adjusted for equal spacing */
+    align-items: center;
+    height: 100vh;
+    padding: 0 5%; /* Ensuring symmetry */
+}
+
+.small-rectangles, .button, #timer, .circle {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 #timer {
+    width: 120px;
+    height: 60px;
+    border: 4px solid red;
+    font-size: 24px;
+    font-weight: bold;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    width: 120px;
-    height: 60px;
-    border: 4px solid red; /* Thicker border with red color */
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 60px;
 }
 
-.small-rectangles {
-    position: absolute;
-    width: 5%; /* Reduce width */
-    height: 4%; /* Keep height the same */
-    background-color: rgb(255, 255, 255);
-    border: 5px solid black;
-    bottom: 10%;
-}
-
-#rectangle1 {
-    left: 3.5%; /* Adjust left position */
-}
-
-#rectangle2 {
-    left: calc(3.5% + 10%);
-}
-
-#rectangle3 {
-    left: calc(3.5% + 20%);
-}
-
-#rectangle4 {
-    left: calc(3.5% + 30%);
-}
-
-#rectangle5 {
-    left: calc(3.5% + 40%);
-}
-
-#rectangle6 {
-    left: calc(3.5% + 50%);
-}
-
-#rectangle7 {
-    left: calc(3.5% + 60%);
-}
-
-#rectangle8 {
-    left: calc(3.5% + 70%);
-}
-
-#rectangle9 {
-    left: calc(3.5% + 80%);
-}
-
-#rectangle10 {
-    left: calc(3.5% + 90%);
-}
-
-
-#start_button,
-#stop_button {
-    position: absolute;
-    width: 18%; /* Reduce width */
-    height: 6%; /* Reduce height */
+.button {
+    width: 18%;
+    height: 6%;
     background-color: yellow;
     border: 5px solid black;
-    display: flex; /* Use flexbox */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
     font-weight: bold;
-    font-family: 'Arial Black', sans-serif; /* Fancy font */
-    font-size: 24px; /* Larger font size */
-    color: black; /* Text color */
+    font-family: 'Arial Black', sans-serif;
+    font-size: 24px;
+    color: black;
 }
 
 #start_button {
-    left: 25%;
+    position: absolute;
     bottom: 25%;
+    left: 25%;
 }
 
 #stop_button {
-    right: 25%;
+    position: absolute;
     bottom: 25%;
+    right: 25%;
 }
 
-#option_one {
-    width: 8%; /* Diameter of the circle */
-    height: 17%; /* Diameter of the circle */
-    background-color: rgb(255, 255, 255);
-    border: 5px solid black;
-    border-radius: 50%; /* Make it a circle */
+.circle {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    border: 4px solid black;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
     position: absolute;
-    left: 30%; /* Adjust horizontal position */
+    top: 2%;
 }
 
-#option_two {
-    width: 8%; /* Diameter of the circle */
-    height: 17%; /* Diameter of the circle */
-    background-color: rgb(255, 255, 255);
-    border: 5px solid black;
-    border-radius: 50%; /* Make it a circle */
-    position: absolute;
-    left: 45%; /* Adjust horizontal position */
-}
-
-#option_three {
-    width: 8%; /* Diameter of the circle */
-    height: 17%; /* Diameter of the circle */
-    background-color: rgb(255, 255, 255);
-    border: 5px solid black;
-    border-radius: 50%; /* Make it a circle */
-    position: absolute;
-    left: 60%; /* Adjust horizontal position */
-}
+#circleOption1 { left: calc(25% - 50px); }
+#circleOption2 { left: calc(50% - 50px); }
+#circleOption3 { left: calc(75% - 50px); }
