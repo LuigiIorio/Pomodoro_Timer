@@ -1,59 +1,127 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const originalTime = '25:00';
-    let countdown;
     const timerDisplay = document.getElementById('timer');
     const startButton = document.getElementById('Start');
     const stopButton = document.getElementById('Stop');
     const presets = [document.getElementById('preset1'), document.getElementById('preset2'), document.getElementById('preset3'), document.getElementById('preset4')];
     const resetButton = document.querySelector('#ResetButton');
-    let currentPresetTime = '25:00'; // Variable to keep track of the current preset time
-    let completedSessions = new Array(10).fill(false); // Initialize array to track completion
-    let isTimerActive = false; // Flag to track timer state
+    let countdown;
+    let currentPresetTime = '25:00'; // Default starting preset time
+    let currentPresetIndex = 0;
+    let completedSessions = new Array(10).fill(false);
+    let isTimerActive = false;
+    let currentPhase = 'work'; // 'work' or 'rest'
+    const workTimes = { 'preset1': '25:00', 'preset2': '45:00', 'preset3': '60:00', 'preset4': '00:05' };
+    const restTimes = { 'preset1': '05:00', 'preset2': '09:00', 'preset3': '12:00', 'preset4': '00:10' };
 
-
-
-    
-    function setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            let date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + expires + "; path=/";
+    function updateTimerDisplay(time) {
+        timerDisplay.textContent = time;
     }
 
-    function getCookie(name) {
-        let nameEQ = name + "=";
-        let ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length));
+    function updateButtonForPhase() {
+        if (currentPhase === 'rest') {
+            stopButton.textContent = 'Skip';
+        } else {
+            stopButton.textContent = 'Stop';
         }
-        return null;
     }
 
-    resetButton.addEventListener('click', function() {
-        if (isTimerActive) {
+    function startTimer(duration) {
+        clearInterval(countdown);
+        isTimerActive = true;
+        const startTime = Date.now();
+        const endTime = startTime + duration * 1000;
+        countdown = setInterval(() => {
+            const secondsLeft = Math.round((endTime - Date.now()) / 1000);
+            if (secondsLeft < 0) {
+                clearInterval(countdown);
+                isTimerActive = false;
+                let completedCount = completedSessions.filter(Boolean).length;
+                if (currentPhase === 'work') {
+                    if (completedCount < completedSessions.length) {
+                        completedSessions[completedCount] = true;
+                        updateCompletedPomodoros();
+                        if (completedCount === 9) { // Check if 10th pomodoro just completed
+                            alert('All Pomodoros Completed!');
+                            return;
+                        }
+                        currentPhase = 'rest';
+                        let restTime = restTimes[`preset${currentPresetIndex + 1}`];
+                        updateTimerDisplay(restTime);
+                        const restDuration = parseInt(restTime.split(':')[0]) * 60 + parseInt(restTime.split(':')[1]);
+                        startTimer(restDuration);
+                    } 
+                } else {
+                    if (completedCount < 10) { // If not all pomodoros are completed, start next pomodoro
+                        currentPhase = 'work';
+                        let workTime = workTimes[`preset${currentPresetIndex + 1}`];
+                        updateTimerDisplay(workTime);
+                        const workDuration = parseInt(workTime.split(':')[0]) * 60 + parseInt(workTime.split(':')[1]);
+                        startTimer(workDuration);
+                    }
+                }
+                updateButtonForPhase();
+                return;
+            }
+            const minutes = Math.floor(secondsLeft / 60);
+            const remainingSeconds = secondsLeft % 60;
+            updateTimerDisplay(`${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`);
+        }, 1000);
+    }
+
+    presets.forEach((preset, index) => {
+        preset.addEventListener('click', function() {
+            if (isTimerActive) {
+                clearInterval(countdown);
+                isTimerActive = false;
+            }
+            currentPresetIndex = index;
+            const workTime = workTimes[preset.id];
+            updateTimerDisplay(workTime);
+            currentPresetTime = workTime;
+            currentPhase = 'work';
+            updateButtonForPhase();
+        });
+    });
+
+    startButton.addEventListener('click', function() {
+        if (!isTimerActive) {
+            const seconds = parseInt(currentPresetTime.split(':')[0]) * 60 + parseInt(currentPresetTime.split(':')[1]);
+            startTimer(seconds);
+        }
+    });
+
+    stopButton.addEventListener('click', function() {
+        if (currentPhase === 'rest') {
             clearInterval(countdown);
             isTimerActive = false;
-        }
-        completedSessions.fill(false);
-        setCookie("completedSessions", completedSessions, 365);
-        updateCompletedPomodoros();
-        timerDisplay.textContent = currentPresetTime;
-    });
-    
-
-    function checkCookie() {
-        let completed = getCookie("completedSessions");
-        if (completed) {
-            completedSessions = JSON.parse(completed);
-            updateCompletedPomodoros();
+            let nextWorkTime = workTimes[`preset${currentPresetIndex + 1}`];
+            currentPhase = 'work';
+            updateTimerDisplay(nextWorkTime);
+            updateButtonForPhase();
+            if (completedSessions.filter(Boolean).length < 10) {
+                startTimer(parseInt(nextWorkTime.split(':')[0]) * 60 + parseInt(nextWorkTime.split(':')[1]));
+            }
         } else {
-            setCookie("completedSessions", completedSessions, 365); // Initialize cookie with the array
+            clearInterval(countdown);
+            isTimerActive = false;
+            updateButtonForPhase();
+            updateTimerDisplay(currentPresetTime);
         }
-    }
+    });
+
+    resetButton.addEventListener('click', function() {
+        clearInterval(countdown);
+        isTimerActive = false;
+        completedSessions.fill
+        (false);
+        updateCompletedPomodoros();
+        currentPhase = 'work';
+        updateButtonForPhase();
+        const workTime = workTimes[`preset1`];
+        updateTimerDisplay(workTime);
+        currentPresetTime = workTime;
+        currentPresetIndex = 0;
+    });
 
     function updateCompletedPomodoros() {
         completedSessions.forEach((completed, index) => {
@@ -61,67 +129,4 @@ document.addEventListener('DOMContentLoaded', function() {
             pomodoro.style.backgroundColor = completed ? 'green' : 'white';
         });
     }
-
-    presets.forEach(preset => {
-        preset.addEventListener('click', function() {
-            const presetTimes = { 'preset1': '25:00', 'preset2': '45:00', 'preset3': '60:00', 'preset4': '00:04' };
-            const newTime = presetTimes[this.id];
-            updateTimer(newTime);
-            currentPresetTime = newTime; // Keep the current preset time updated
-        });
-    });
-
-    function startTimer(duration) {
-        if (!isTimerActive) {
-            isTimerActive = true; // Indicate that the timer is now active
-            clearInterval(countdown);
-            const startTime = Date.now();
-            const endTime = startTime + duration * 1000;
-            countdown = setInterval(() => {
-                const secondsLeft = Math.round((endTime - Date.now()) / 1000);
-                if (secondsLeft < 0) {
-                    clearInterval(countdown);
-                    isTimerActive = false; // Timer is no longer active
-                    for (let i = 0; i < completedSessions.length; i++) {
-                        if (!completedSessions[i]) {
-                            completedSessions[i] = true;
-                            break;
-                        }
-                    }
-                    setCookie("completedSessions", completedSessions, 365);
-                    updateCompletedPomodoros();
-                    timerDisplay.textContent = currentPresetTime;
-                    return;
-                }
-                const minutes = Math.floor(secondsLeft / 60);
-                const remainingSeconds = secondsLeft % 60;
-                timerDisplay.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-            }, 1000);
-        }
-    }
-    
-
-    startButton.addEventListener('click', function() {
-        if (!isTimerActive) {
-            const timeArray = currentPresetTime.split(':');
-            const seconds = parseInt(timeArray[0], 10) * 60 + parseInt(timeArray[1], 10);
-            startTimer(seconds);
-        }
-    });
-    
-
-    stopButton.addEventListener('click', function() {
-        if (isTimerActive) {
-            clearInterval(countdown);
-            isTimerActive = false; // Indicate that the timer is no longer active
-            timerDisplay.textContent = currentPresetTime;
-        }
-    });
-
-    function updateTimer(newTime) {
-        clearInterval(countdown);
-        timerDisplay.textContent = newTime;
-    }
-
-    checkCookie();
 });

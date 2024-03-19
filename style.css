@@ -108,7 +108,7 @@ body {
     background-color: rgb(255, 0, 0);
     margin: auto;
     top: 45%;
-    left: 65%;
+    left: 85%;
     transform: translate(-50%, -50%);
     padding: 1rem;
     transition: background-color 0.3s ease;
@@ -200,3 +200,4 @@ body {
 #preset4:hover {
     background-color: #ffcc80; /* Lighter orange */
 }
+
