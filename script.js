@@ -5,9 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const startButton = document.getElementById('Start');
     const stopButton = document.getElementById('Stop');
     const presets = [document.getElementById('preset1'), document.getElementById('preset2'), document.getElementById('preset3'), document.getElementById('preset4')];
+    const resetButton = document.querySelector('#ResetButton');
     let currentPresetTime = '25:00'; // Variable to keep track of the current preset time
     let completedSessions = new Array(10).fill(false); // Initialize array to track completion
+    let isTimerActive = false; // Flag to track timer state
 
+
+
+    
     function setCookie(name, value, days) {
         let expires = "";
         if (days) {
@@ -27,6 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return null;
     }
+
+    resetButton.addEventListener('click', function() {
+        if (isTimerActive) {
+            clearInterval(countdown);
+            isTimerActive = false;
+        }
+        completedSessions.fill(false);
+        setCookie("completedSessions", completedSessions, 365);
+        updateCompletedPomodoros();
+        timerDisplay.textContent = currentPresetTime;
+    });
+    
 
     function checkCookie() {
         let completed = getCookie("completedSessions");
@@ -55,39 +72,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function startTimer(duration) {
-        clearInterval(countdown);
-        const startTime = Date.now();
-        const endTime = startTime + duration * 1000;
-        countdown = setInterval(() => {
-            const secondsLeft = Math.round((endTime - Date.now()) / 1000);
-            if (secondsLeft < 0) {
-                clearInterval(countdown);
-                for (let i = 0; i < completedSessions.length; i++) {
-                    if (!completedSessions[i]) {
-                        completedSessions[i] = true;
-                        break;
+        if (!isTimerActive) {
+            isTimerActive = true; // Indicate that the timer is now active
+            clearInterval(countdown);
+            const startTime = Date.now();
+            const endTime = startTime + duration * 1000;
+            countdown = setInterval(() => {
+                const secondsLeft = Math.round((endTime - Date.now()) / 1000);
+                if (secondsLeft < 0) {
+                    clearInterval(countdown);
+                    isTimerActive = false; // Timer is no longer active
+                    for (let i = 0; i < completedSessions.length; i++) {
+                        if (!completedSessions[i]) {
+                            completedSessions[i] = true;
+                            break;
+                        }
                     }
+                    setCookie("completedSessions", completedSessions, 365);
+                    updateCompletedPomodoros();
+                    timerDisplay.textContent = currentPresetTime;
+                    return;
                 }
-                setCookie("completedSessions", completedSessions, 365);
-                updateCompletedPomodoros();
-                timerDisplay.textContent = currentPresetTime; // Reset the display
-                return;
-            }
-            const minutes = Math.floor(secondsLeft / 60);
-            const remainingSeconds = secondsLeft % 60;
-            timerDisplay.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-        }, 1000);
+                const minutes = Math.floor(secondsLeft / 60);
+                const remainingSeconds = secondsLeft % 60;
+                timerDisplay.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }, 1000);
+        }
     }
+    
 
     startButton.addEventListener('click', function() {
-        const timeArray = currentPresetTime.split(':');
-        const seconds = parseInt(timeArray[0], 10) * 60 + parseInt(timeArray[1], 10);
-        startTimer(seconds);
+        if (!isTimerActive) {
+            const timeArray = currentPresetTime.split(':');
+            const seconds = parseInt(timeArray[0], 10) * 60 + parseInt(timeArray[1], 10);
+            startTimer(seconds);
+        }
     });
+    
 
     stopButton.addEventListener('click', function() {
-        clearInterval(countdown);
-        timerDisplay.textContent = currentPresetTime;
+        if (isTimerActive) {
+            clearInterval(countdown);
+            isTimerActive = false; // Indicate that the timer is no longer active
+            timerDisplay.textContent = currentPresetTime;
+        }
     });
 
     function updateTimer(newTime) {
