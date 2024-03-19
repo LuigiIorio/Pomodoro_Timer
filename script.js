@@ -84,6 +84,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     startButton.addEventListener('click', function() {
+
+        if (completedSessions.filter(Boolean).length === 10) {
+            completedSessions.fill(false);
+            updateCompletedPomodoros();
+        }
+
         if (!isTimerActive) {
             const seconds = parseInt(currentPresetTime.split(':')[0]) * 60 + parseInt(currentPresetTime.split(':')[1]);
             startTimer(seconds);
@@ -110,18 +116,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     resetButton.addEventListener('click', function() {
-        clearInterval(countdown);
-        isTimerActive = false;
-        completedSessions.fill
-        (false);
+        if (isTimerActive) {
+            clearInterval(countdown);
+            isTimerActive = false;
+        }
+        completedSessions.fill(false);
         updateCompletedPomodoros();
-        currentPhase = 'work';
-        updateButtonForPhase();
-        const workTime = workTimes[`preset1`];
+        const workTime = workTimes[`preset${currentPresetIndex + 1}`];
         updateTimerDisplay(workTime);
         currentPresetTime = workTime;
-        currentPresetIndex = 0;
     });
+    
+    
 
     function updateCompletedPomodoros() {
         completedSessions.forEach((completed, index) => {
@@ -130,3 +136,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
