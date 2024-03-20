@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPhase = 'work'; // 'work' or 'rest'
     const workTimes = { 'preset1': '25:00', 'preset2': '45:00', 'preset3': '60:00', 'preset4': '00:05' };
     const restTimes = { 'preset1': '05:00', 'preset2': '09:00', 'preset3': '12:00', 'preset4': '00:10' };
+    const fireworksContainer = document.getElementById('fireworks');
+    const fireworks = new Fireworks.default(fireworksContainer, { /* options */ });
+    
+
 
     function updateTimerDisplay(time) {
         timerDisplay.textContent = time;
@@ -40,16 +44,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (completedCount < completedSessions.length) {
                         completedSessions[completedCount] = true;
                         updateCompletedPomodoros();
-                        if (completedCount === 9) { // Check if 10th pomodoro just completed
-                            alert('All Pomodoros Completed!');
-                            return;
-                        }
+                        fireworks.start();
+                        setTimeout(() => {
+                            fireworks.stop();
+                        }, 5000); // Stop fireworks after 5 seconds
                         currentPhase = 'rest';
                         let restTime = restTimes[`preset${currentPresetIndex + 1}`];
                         updateTimerDisplay(restTime);
                         const restDuration = parseInt(restTime.split(':')[0]) * 60 + parseInt(restTime.split(':')[1]);
                         startTimer(restDuration);
-                    } 
+                    }
                 } else {
                     if (completedCount < 10) { // If not all pomodoros are completed, start next pomodoro
                         currentPhase = 'work';
@@ -127,8 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPresetTime = workTime;
     });
     
-    
-
     function updateCompletedPomodoros() {
         completedSessions.forEach((completed, index) => {
             let pomodoro = document.getElementById('pomodoro' + (index + 1));
@@ -136,5 +138,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-
