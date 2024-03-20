@@ -46,7 +46,7 @@ body {
 }
 
 #preset4:hover {
-    background-color: #ffcc80; /* Lighter orange */
+    background-color: #ffcc80; 
 }
 
 #timer {
@@ -93,7 +93,6 @@ body {
     border-radius: 1.5rem
 }
 
-
 #ResetButton {
     position: absolute;
     height: 6rem;
@@ -116,9 +115,8 @@ body {
     border-radius: 2rem;
 }
 
-
 #ResetButton:hover {
-    background-color: #006400; /* Darker green on hover */
+    background-color: #006400; 
 }
 
 #resetBtn {
@@ -131,7 +129,6 @@ body {
     color: inherit;
     cursor: pointer;
 }
-
 
 #Start {
     color: rgb(85, 255, 11);
@@ -171,33 +168,31 @@ body {
     margin-right: 0;
 }
 
-/* Hover effects */
 #preset1, #preset2, #preset3, #Start, #Stop, #ResetButton{
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 #preset1:hover {
-    background-color: #99e6ff; /* Lighter aqua */
+    background-color: #99e6ff; 
 }
 #preset2:hover {
-    background-color: #ffff99; /* Lighter yellow */
+    background-color: #ffff99; 
 }
 #preset3:hover {
-    background-color: #b3e5fc; /* Lighter blue */
+    background-color: #b3e5fc;
 }
 #Start:hover {
-    background-color: #f06292; /* Lighter pink */
+    background-color: #f06292; 
 }
 #Stop:hover {
-    background-color: #ef5350; /* Lighter red */
+    background-color: #ef5350; 
 }
 
 #timer:hover {
-    background-color: #006400; /* Darker green on hover */
+    background-color: #006400; 
 }
 
 #preset4:hover {
-    background-color: #ffcc80; /* Lighter orange */
+    background-color: #ffcc80; 
 }
-
