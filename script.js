@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const restTimes = { 'preset1': '05:00', 'preset2': '09:00', 'preset3': '12:00', 'preset4': '00:10' };
     const fireworksContainer = document.getElementById('fireworks');
     const fireworks = new Fireworks.default(fireworksContainer, {});
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
     
 
     const stopSound = () => {
@@ -22,6 +23,16 @@ document.addEventListener('DOMContentLoaded', function() {
         sound.currentTime = 0; // Rewind to the start
     };
 
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    });
+    
 
     document.getElementById('Stop').addEventListener('click', function() {
         clearInterval(countdown);
@@ -59,6 +70,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         completedSessions[completedCount] = true;
                         updateCompletedPomodoros();
                         playSoundForDuration('alarm', 3000); // Play sound for 3 seconds
+                        // Start fireworks display
+                        fireworks.start();
+                        // Stop fireworks after 5 seconds
+                        setTimeout(() => {
+                            fireworks.stop();
+                        }, 5000);
                         if (completedCount === 9) { // Check if 10th pomodoro just completed
                             alert('All Pomodoros Completed!');
                             return;
@@ -163,3 +180,4 @@ function playSoundForDuration(soundId, duration) {
         sound.currentTime = 0;
     }, duration);
 }
+

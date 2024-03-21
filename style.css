@@ -196,3 +196,18 @@ body {
 #preset4:hover {
     background-color: #ffcc80; 
 }
+
+#fullscreen-btn{
+    font-size: 15rem;
+    position: absolute;
+    left: 95%;
+    bottom: 2%;
+    cursor: pointer; /* Make it clear the icon is clickable */
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    transform: translateX(-50%); /* Centers the button horizontally */
+}
+
+
