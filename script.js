@@ -14,18 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const restTimes = { 'preset1': '05:00', 'preset2': '09:00', 'preset3': '12:00', 'preset4': '00:10' };
     const fireworksContainer = document.getElementById('fireworks');
     const fireworks = new Fireworks.default(fireworksContainer, {});
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    
+    let endTime;
+    let pausedTime = 0;
 
-    const stopSound = () => {
+    
+    function stopSound() {
         const sound = document.getElementById('alarm');
         sound.pause();
         sound.currentTime = 0; // Rewind to the start
-    };
+    }
 
     document.getElementById('fullscreen-btn').addEventListener('click', () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -34,150 +37,169 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
 
-    document.getElementById('Stop').addEventListener('click', function() {
-        clearInterval(countdown);
-        isTimerActive = false;
-        stopSound(); // Add this line to stop the sound when "Stop" is clicked
-        updateButtonForPhase();
-        updateTimerDisplay(currentPresetTime);
-    });
-
     function updateTimerDisplay(time) {
         timerDisplay.textContent = time;
     }
 
-    function updateButtonForPhase() {
-        if (currentPhase === 'rest') {
-            stopButton.textContent = 'Skip';
-        } else {
-            stopButton.textContent = 'Stop';
+    function resetTimerState() {
+        clearInterval(countdown);
+        isTimerActive = false;
+        startButton.textContent = 'Start';
+        stopSound();
+        if (currentPhase === 'rest') stopButton.textContent = 'Skip';
+        else stopButton.textContent = 'Stop';
+    }
+    
+
+    function handleSessionCompletion() {
+        clearInterval(countdown);
+        isTimerActive = false;
+        startButton.textContent = 'Pause';
+        let completedCount = completedSessions.filter(Boolean).length;
+        if (currentPhase === 'work') {
+            if (completedCount < completedSessions.length) {
+                completedSessions[completedCount] = true;
+                updateCompletedPomodoros();
+                playSoundForDuration('alarm', 3000);
+                fireworks.start();
+                setTimeout(() => fireworks.stop(), 5000);
+                if (completedCount === 9) {
+                    alert('All Pomodoros Completed!');
+                    return;
+                }
+                transitionToRest();
+            }
+        } else if (completedCount < 10) {
+            transitionToWork();
         }
+        if (currentPhase === 'rest') stopButton.textContent = 'Skip';
+        else stopButton.textContent = 'Stop';
+    }
+    
+
+    function transitionToRest() {
+        currentPhase = 'rest';
+        stopButton.textContent = 'Skip';
+        let restTime = restTimes[`preset${currentPresetIndex + 1}`];
+        updateTimerDisplay(restTime);
+        startTimer(parseInt(restTime.split(':')[0]) * 60 + parseInt(restTime.split(':')[1]), true);
+    }
+    
+
+    function transitionToWork() {
+        currentPhase = 'work';
+        let workTime = workTimes[`preset${currentPresetIndex + 1}`];
+        updateTimerDisplay(workTime);
+        startTimer(parseInt(workTime.split(':')[0]) * 60 + parseInt(workTime.split(':')[1]), true);
     }
 
-    function startTimer(duration) {
-        clearInterval(countdown);
-        isTimerActive = true;
-        const startTime = Date.now();
-        const endTime = startTime + duration * 1000;
-        countdown = setInterval(() => {
-            const secondsLeft = Math.round((endTime - Date.now()) / 1000);
-            if (secondsLeft < 0) {
-                clearInterval(countdown);
-                isTimerActive = false;
-                let completedCount = completedSessions.filter(Boolean).length;
-                if (currentPhase === 'work') {
-                    if (completedCount < completedSessions.length) {
-                        completedSessions[completedCount] = true;
-                        updateCompletedPomodoros();
-                        playSoundForDuration('alarm', 3000); // Play sound for 3 seconds
-                        // Start fireworks display
-                        fireworks.start();
-                        // Stop fireworks after 5 seconds
-                        setTimeout(() => {
-                            fireworks.stop();
-                        }, 5000);
-                        if (completedCount === 9) { // Check if 10th pomodoro just completed
-                            alert('All Pomodoros Completed!');
-                            return;
-                        }
-                        currentPhase = 'rest';
-                        let restTime = restTimes[`preset${currentPresetIndex + 1}`];
-                        updateTimerDisplay(restTime);
-                        const restDuration = parseInt(restTime.split(':')[0]) * 60 + parseInt(restTime.split(':')[1]);
-                        startTimer(restDuration);
-                    } 
-                } else {
-                    if (completedCount < 10) { // If not all pomodoros are completed, start next pomodoro
-                        currentPhase = 'work';
-                        let workTime = workTimes[`preset${currentPresetIndex + 1}`];
-                        updateTimerDisplay(workTime);
-                        const workDuration = parseInt(workTime.split(':')[0]) * 60 + parseInt(workTime.split(':')[1]);
-                        startTimer(workDuration);
-                        playSoundForDuration('alarm', 3000); // Play sound for 3 seconds
-                    }
-                }
-                updateButtonForPhase();
-                return;
-            }
+ // Adjust startTimer function
+function startTimer(duration, autoStart = false) {
+    clearInterval(countdown); // Ensure no previous intervals are running
+    const startTime = Date.now();
+    endTime = startTime + duration * 1000; // This sets the end time based on the duration provided
+
+    countdown = setInterval(() => {
+        const secondsLeft = Math.round((endTime - Date.now()) / 1000);
+        if (secondsLeft < 0) {
+            clearInterval(countdown);
+            handleSessionCompletion();
+        } else {
+            isTimerActive = true;
+            startButton.textContent = 'Pause'; // Make sure this button always reflects the action to pause the timer
             const minutes = Math.floor(secondsLeft / 60);
             const remainingSeconds = secondsLeft % 60;
             updateTimerDisplay(`${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`);
-        }, 1000);
-    }
-
-    presets.forEach((preset, index) => {
-        preset.addEventListener('click', function() {
-            if (isTimerActive) {
-                clearInterval(countdown);
-                isTimerActive = false;
-            }
-            currentPresetIndex = index;
-            const workTime = workTimes[preset.id];
-            updateTimerDisplay(workTime);
-            currentPresetTime = workTime;
-            currentPhase = 'work';
-            updateButtonForPhase();
-        });
-    });
+        }
+    }, 1000);
+}
+    
 
     startButton.addEventListener('click', function() {
-
-        if (completedSessions.filter(Boolean).length === 10) {
-            completedSessions.fill(false);
-            updateCompletedPomodoros();
-        }
-
-        if (!isTimerActive) {
-            const seconds = parseInt(currentPresetTime.split(':')[0]) * 60 + parseInt(currentPresetTime.split(':')[1]);
-            startTimer(seconds);
-        }
-    });
-
-    stopButton.addEventListener('click', function() {
-        if (currentPhase === 'rest') {
-            clearInterval(countdown);
-            isTimerActive = false;
-            let nextWorkTime = workTimes[`preset${currentPresetIndex + 1}`];
-            currentPhase = 'work';
-            updateTimerDisplay(nextWorkTime);
-            updateButtonForPhase();
-            if (completedSessions.filter(Boolean).length < 10) {
-                startTimer(parseInt(nextWorkTime.split(':')[0]) * 60 + parseInt(nextWorkTime.split(':')[1]));
+        if (startButton.textContent === 'Start' || startButton.textContent === 'Resume') {
+            if (!isTimerActive) {
+                let duration;
+                if (pausedTime > 0) {
+                    duration = pausedTime / 1000;
+                    pausedTime = 0; // Reset pausedTime
+                } else {
+                    duration = parseInt(currentPresetTime.split(':')[0]) * 60 + parseInt(currentPresetTime.split(':')[1]);
+                }
+                startTimer(duration, false);
+            } else {
+                // This block is for pausing
+                pausedTime = endTime - Date.now();
+                clearInterval(countdown);
+                isTimerActive = false;
+                startButton.textContent = 'Resume';
             }
         } else {
+            // This block handles the case when the button says 'Pause', meaning the timer is active and should be paused
+            pausedTime = endTime - Date.now();
             clearInterval(countdown);
             isTimerActive = false;
-            updateButtonForPhase();
+            startButton.textContent = 'Resume';
+        }
+    });
+    
+
+    stopButton.addEventListener('click', function() {
+        if (currentPhase === 'rest' && stopButton.textContent === 'Skip') {
+            handleSessionCompletion();
+            stopButton.textContent = 'Stop'; // Change to stop after skipping
+        } else {
+            resetTimerState();
             updateTimerDisplay(currentPresetTime);
         }
     });
+    
+
+    /* 
+    
+    aggiungi al gpt che deve splittare le funzioni e le righe di codice in diversi text-box che puoi copypastare, così non devi evidenziarli tutti col mouse per copy-pastare
+    
+    */
+    
 
     resetButton.addEventListener('click', function() {
-        if (isTimerActive) {
-            clearInterval(countdown);
-            isTimerActive = false;
-        }
+        resetTimerState();
         completedSessions.fill(false);
         updateCompletedPomodoros();
-        const workTime = workTimes[`preset${currentPresetIndex + 1}`];
-        updateTimerDisplay(workTime);
-        currentPresetTime = workTime;
+        currentPresetTime = workTimes[`preset${currentPresetIndex + 1}`];
+        updateTimerDisplay(currentPresetTime);
+        currentPhase = 'work';
+        startButton.textContent = 'Start';
+        stopButton.textContent = 'Stop';
     });
     
+
+    presets.forEach((preset, index) => {
+        preset.addEventListener('click', function() {
+            resetTimerState();
+            currentPresetIndex = index;
+            currentPresetTime = workTimes[preset.id];
+            updateTimerDisplay(currentPresetTime);
+            currentPhase = 'work';
+            startButton.textContent = 'Start';
+            stopButton.textContent = 'Stop';
+        });
+    });
+    
+
     function updateCompletedPomodoros() {
         completedSessions.forEach((completed, index) => {
             let pomodoro = document.getElementById('pomodoro' + (index + 1));
             pomodoro.style.backgroundColor = completed ? 'green' : 'white';
         });
     }
-});
 
-function playSoundForDuration(soundId, duration) {
-    const sound = document.getElementById(soundId);
-    sound.play();
-    setTimeout(() => {
-        sound.pause(); 
-        sound.currentTime = 0;
-    }, duration);
-}
+    function playSoundForDuration(soundId, duration) {
+        const sound = document.getElementById(soundId);
+        sound.play();
+        setTimeout(() => {
+            sound.pause(); 
+            sound.currentTime = 0;
+        }, duration);
+    }
+});
 
